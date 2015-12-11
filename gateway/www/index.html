@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>宝宅智能家居</title>
+
+    <meta name="viewport" content="width=1000, initial-scale=1.0, maximum-scale=1.0">
+
+    <link href="css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="css/flat-ui.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/vendor/html5shiv.js"></script>
+      <script src="js/vendor/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+    body {
+        padding-top: 90px;
+        /* Required padding for .navbar-fixed-top. Remove if using .navbar-static-top. Change if height of navigation changes. */
+    }
+    </style>
+</head>
+
+<body>
+     <!-- Static navbar -->
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="sr-only">Toggle navigation</span>
+          </button>
+          <a class="navbar-brand" href="http://baozhai.cc" target="_blank">宝宅智能家居</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li id="status"><a href="/?m=status">状态</a></li>
+            <li id="gwdesign" ><a href="/?m=gwdesign">编写网关程序</a></li>
+            <li id="phdesign"><a href="/?m=phdesign">设计控制界面</a></li>
+          </ul>
+
+          <ul class="nav navbar-nav navbar-right">
+            <li  id="mdpasswd" ><a href="/?m=mdpasswd">修改密码</a></li>
+            <li><a href="/?m=quit">退出</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <!-- Page Content -->
+
+
+<style type="text/css" media="screen">
+    body {
+        overflow: hidden;
+        margin: 0;
+    }
+
+</style>
+<div id="preview_c">
+  <iframe id="preview" src=""></iframe>
+</div>
+
+   <footer style="position: absolute;bottom: 0px;"><a href="http://baozhai.cc/">宝宅智能家居 bate v0.1</a>
+   </footer>
+    <!-- jQuery Version 1.11.1 -->
+    <script src="js/jquery.min.js"></script>
+    <script src="js/flat-ui.min.js"></script>
+
+<div id="wait_tip">正在加载数据……</div>
+<script type="text/javascript">
+var previewFrame = document.getElementById("preview");
+  previewFrame.onload = function(){
+    var wait_tip = document.getElementById("wait_tip");
+    wait_tip.style.display = "none";
+  }
+
+//function getUrlPara(paraName){   
+//    var sUrl  =  location.href;
+//    var sReg  =  "(?:\\?|&){1}"+paraName+"=([^&]*)";
+//    var re=new RegExp(sReg,"gi");  
+//    re.exec(sUrl);  
+//    return RegExp.$1;  
+//}
+
+function get_data(action,callback)
+{
+    $.ajax({
+        url: "/api/" + action,
+        type:"GET",
+        dataType: "json",
+        cache: false,
+        success: function(data){
+            callback( data );
+        }
+    });
+}
+
+function getUrlPara (name) {
+    var sUrl  =  location.href;
+    var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+    var r = sUrl.substr(sUrl.indexOf("\?")+1).match(reg);
+    if (r!=null) return unescape(r[2]);
+    return null;
+}
+
+
+
+var module = getUrlPara("m");
+module = module ? module : "status";
+
+    switch( module ){
+        case "status":{
+            previewFrame.src = "status.html";
+            break;
+        }
+        case "gwdesign":{
+            previewFrame.src = "sedit.html";
+            break;
+        }
+        case "phdesign":{
+            get_data( "status",function(data){
+                previewFrame.src = "http://tools.baozhai.cc/uiedit.html?mac=" + data.svrinfo.mac;
+            });
+
+            break;
+        }
+        case "mdpasswd":{
+            previewFrame.src = "mdpasswd.html";
+            break;
+        }
+        case "quit":{
+            location.href = "login.html";
+            break;
+        }
+    }
+
+   $("#"+module).addClass("active");
+
+</script>
+</body>
+
+</html>

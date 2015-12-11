@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<title>Title</title>
+		<meta name="viewport" content="width=device-width" />
+		<link rel="stylesheet" href="jstree/themes/default/style.min.css" />
+		<style>
+		html, body { background:#ebebeb; font-size:10px; margin:0; padding:0; }
+		#container { 
+			margin: 0px auto 0 auto;
+			background: rgb(255, 255, 255);
+			border-radius: 0px;
+			padding: 0px;
+			overflow: hidden;
+		 }
+
+		#toolbar { 
+			position: absolute;
+			margin-top: 4px;
+			margin-left: 15px;
+			text-align: center;
+		 }
+		#user_container{
+			position: absolute;
+			left: 0px;
+			top: 30px;
+			right: 0px;
+			bottom: 5px;
+			/*border: 1px solid rgb(0, 0, 0);*/
+			border-top:solid #000000;
+			border-bottom:solid #000000;
+		}
+		#editor_container{
+		}
+		#editor{
+		 }
+		#tree {
+			left: 0px;
+			top: 0px;
+			/*border: 2px solid rgb(0, 0, 0);*/
+			position: absolute;
+			bottom: 0px;
+		}
+		 #console{
+		 }
+		#action_tip{
+			display: none;
+			position: absolute;
+			left: 0px;
+			top: 0px;
+			width: 100%;
+			height: 20px;
+			text-align: center;
+			background: rgba(0, 0, 0, 0.6);
+			font-size: 15px;
+			font-weight: 600;
+			z-index: 9999;
+			color: rgb(255, 255, 0);
+			border-bottom-right-radius: 2em;
+			border-bottom-left-radius: 2em;
+		}
+		#tree .folder { background:url('img/file_sprite.png') right bottom no-repeat; }
+		#tree .file-text, #tree .file-txt, #tree .file-md, #tree .file-log,
+		#tree .file-js { background-position: -434px -18px }
+		</style>
+	</head>
+	<body>
+		<div id="action_tip">自动保存成功</div>
+		<div id="container" role="main">
+				<div id="toolbar">
+					<button id="save">保存(Ctrl+S)</button>
+					<button disabled="true" id="start">...</button>
+					<div style="display: inline;border: 1px solid rgb(0, 0, 0);margin-right: 5px"></div>
+					<div style="display: inline" id="mem_tip">内存占用：*</div>
+					<div style="display: inline;border: 1px solid rgb(0, 0, 0);margin-right: 5px"></div>
+					<div style="display: inline" id="device_tip">设备数：0</div>
+				</div>
+				<div id="user_container">
+					<div id="tree"></div>
+					<div id="editor_container">
+						<div id="editor"></div>
+						<div id="console"></div>
+					</div>
+				</div>
+		</div>
+
+		<script src="js/jquery.min.js"></script>
+		<script src="jstree/jstree.min.js"></script>
+		<script src="js/base64.min.js"></script>
+		<script src="ace/ace.js"></script>
+		<script src="js/jquery.splitter-0.14.0.js"></script>
+		<link href="css/jquery.splitter.css" rel="stylesheet"/>
+		<script>
+		$(function () {
+
+			$('#user_container').css( {width:"100%"} ).split({orientation:'vertical', limit:100,position:'15%'});
+			$('#editor_container').css( {height:"100%"} ).split({orientation:'horizontal', limit:50,position:'80%'});
+			var autosave_delay;
+			var bsave_change = false;
+			var cur_file = "";
+			var bget_status = true;
+
+			var host = window.location.hostname;
+
+			$(window).keydown(function(e) {
+//				console.log(e);//打印event，观察各属性，代替查阅文档，调试用。
+				if (e.keyCode == 83 && e.ctrlKey) {
+					e.preventDefault();
+					//dosomething
+					save( cur_file );
+				}
+			});
+
+//			$(document).keypress(function(e){
+//				console.log( e );
+//				if(e.ctrlKey && e.which == 13) {
+//					alert("You clicked Ctrl+Enter");
+//				} else if (e.shiftKey && e.which==13) {
+//					alert("You clicked Shift+Enter");
+//				}  else if (e.altKey && e.which==65) {
+//					alert("You clicked Alt+A");
+//				}
+//			});
+
+			ace.require("ace/ext/language_tools");
+			var editor = ace.edit("editor");
+			editor.session.setMode("ace/mode/javascript");
+			editor.setTheme("ace/theme/tomorrow");
+			// enable autocompletion and snippets
+			editor.setOptions({
+				enableBasicAutocompletion: true,
+				enableSnippets: true,
+				enableLiveAutocompletion: false
+			});
+
+
+			editor.on("change", function() {
+				bsave_change = true;
+			});
+
+			function append_console( strlog ){
+				strlog = strlog.split("\n");
+				for( var k in strlog ){
+					var v = strlog[k];
+					if ( v.indexOf("[sys]")>=0 ){
+						$("#console").append( '<font color="red">' +  v + "</font><br/>" );
+					}else{
+						$("#console").append( '<font color="blue">' +  v + "</font><br/>" );
+					}
+				}
+				$("#console").scrollTop( $("#console")[0].scrollHeight );
+			}
+
+			$("#save").on("click", function(e){
+				e.preventDefault();
+				save(cur_file);
+				//append_console('test');
+			});
+
+			$("#start").on("click",function(e){
+				var action = "start";
+				if ( $("#start").html()=="停止" ){
+					action = "kill";
+				}else{
+					action = "start";
+					$("#console").html("");
+				}
+				bget_status = false;
+				$("#start").html("正在执行");
+				$("#start").attr("disabled","true");
+				$.ajax({
+					url: "/api/" + action,
+					type:"GET",
+					dataType: "jsonp",
+					cache: false,
+					success: function(dat){
+						$("#start").attr("disabled",null);
+						if ( dat.result && dat.result == "success" ){
+							if ( action=="start" ){
+								$("#start").html("停止");
+							}else{
+								$("#start").html("启动");
+							}
+						}
+						bget_status = true;
+					},
+					error : function(){
+						$("#start").attr("disabled","true");
+					}
+				});
+			});
+
+			$("#save").on("click", function(e){
+				e.preventDefault();
+				save(cur_file);
+			});
+
+
+			function show_tip(msg){
+				$("#action_tip").html(msg);
+				$("#action_tip").fadeIn();
+				clearTimeout( autosave_delay );
+				autosave_delay = setTimeout( function(){
+					$("#action_tip").fadeOut();
+				},2000);
+			}
+
+			function save( file,callback ){
+				if ( file==""  || !bsave_change ) return;
+				bsave_change = false;
+				var save_text = $("#save").html();
+				$.ajax({
+					url: "/api/write?name="+file,
+					type:"POST",
+					data:Base64.encode( editor.getValue() ),
+					dataType: "json",
+					cache: false,
+					success: function(dat){
+						if ( callback ) callback();
+						show_tip(file + " 保存成功！");
+					},
+					error : function(){
+						if ( callback )callback();
+						show_tip(file + " 保存成功！");
+					}
+				});
+			}
+
+			setInterval( function(){
+				if ( bsave_change ){
+					show_tip("自动保存成功");
+					bsave_change = false;
+				}
+			},20000);
+
+			setInterval( function(){
+				$.ajax({
+					url: "/api/log",
+					type:"GET",
+					dataType: "jsonp",
+					cache: false,
+					success: function(data){
+						var log;
+						while( log = data.log.pop() ){
+							append_console( log );
+						}
+					}
+				});
+				if ( bget_status ){
+					$.ajax({
+						url: "/api/status",
+						type:"GET",
+						dataType: "jsonp",
+						cache: false,
+						success: function(dat){
+							$("#start").attr("disabled",null);
+							if ( bget_status && dat.result && dat.result == "success" ){
+								$("#start").html("停止");
+
+								if ( dat.svrinfo ){
+									$("#mem_tip").html("内存占用："+ ( dat.svrinfo.mem_usage.rss/1024/1024 ).toFixed(2) + "M" );
+									$("#device_tip").html("设备数：" +  dat.svrinfo.device_cnts );
+								}
+							}else{
+								$("#start").html("启动");
+
+								$("#mem_tip").html("内存占用：*");
+								$("#device_tip").html("设备数：*");
+							}
+						},
+						error : function(){
+							$("#start").attr("disabled","true");
+						}
+					});
+				}
+			},1000 );
+
+			$('#tree')
+				.jstree({
+					'core' : {
+						'data' : function (obj, callback) {
+							var that = this;
+						    $.ajax({ 
+				              url: "/api/pathlist",
+				              type:"GET", 
+				              dataType: "jsonp", 
+				              cache: false,
+				              success: function(data){
+				                console.log( data );
+				                callback.call(that, data.data);
+				              }
+				     		});				         
+						},
+						'check_callback' : function(o, n, p, i, m) {
+							if(m && m.dnd && m.pos !== 'i') { return false; }
+							if(o === "move_node" || o === "copy_node") {
+								if(this.get_node(n).parent === this.get_node(p).id) { return false; }
+							}
+							return true;
+						},
+						'themes' : {
+							'responsive' : false,
+							'variant' : 'small',
+							'stripes' : true
+						}
+					},
+					'sort' : function(a, b) {
+						return this.get_type(a) === this.get_type(b) ? (this.get_text(a) > this.get_text(b) ? 1 : -1) : (this.get_type(a) >= this.get_type(b) ? 1 : -1);
+					},
+					'contextmenu' : {
+						'items' : function(node) {
+							var tmp = $.jstree.defaults.contextmenu.items();
+							delete tmp.create.action;
+							tmp.create = {
+									"label"	: "创建文件",
+									"action": function (data) {
+										var inst = $.jstree.reference(data.reference),
+											obj = inst.get_node(data.reference);
+										inst.create_node(obj, { type : "file" }, "last", function (new_node) {
+											setTimeout(function () { inst.edit(new_node); },0);
+										});
+									}
+							};
+							if(this.get_type(node) === "file") {
+								delete tmp.create;
+							}else{
+								delete tmp.remove;
+								delete tmp.rename;
+							}
+
+							delete tmp.ccp;
+							console.log( tmp );
+							for( var k in tmp){
+								switch( k ){
+									case 'rename':{
+										tmp[k].label = '重命名';
+										break;
+									}
+									case 'remove':{
+										tmp[k].label = '删除';
+										break;
+									}
+								}
+							}
+							return tmp;
+						}
+					},
+					'types' : {
+						'default' : { 'icon' : 'folder' },
+						'file' : { 'valid_children' : [], 'icon' : 'file' }
+					},
+					'unique' : {
+						'duplicate' : function (name, counter) {
+							return name + ' ' + counter;
+						}
+					},
+					'plugins' : ['state','dnd','sort','types','contextmenu','unique']
+				})
+				.on('delete_node.jstree', function (e, data) {
+					$.ajax({
+		              url: "/api/delfile",
+		              type:"GET", 
+		              data:{"name":data.node.text},
+		              dataType: "jsonp", 
+		              cache: false,
+		              success: function(dat){
+		              	if ( dat.result ){
+		              		data.instance.refresh();
+		              	}else{
+		              		data.instance.refresh();
+		              	}
+		              }
+		     		});	
+				})
+				.on('create_node.jstree', function (e, data) {
+					$.ajax({ 
+		              url: "/api/createfile",
+		              type:"GET", 
+		              data:{"name":data.node.text},
+		              dataType: "jsonp", 
+		              cache: false,
+		              success: function(dat){
+		              	if ( dat.result ){
+
+		              	}else{
+		              		data.instance.refresh();
+		              	}
+		              }
+		     		});	
+					// $.get('?operation=create_node', { 'type' : data.node.type, 'id' : data.node.parent, 'text' : data.node.text })
+					// 	.done(function (d) {
+					// 		data.instance.set_id(data.node, d.id);
+					// 	})
+					// 	.fail(function () {
+					// 		data.instance.refresh();
+					// });
+				})
+				.on('rename_node.jstree', function (e, data) {
+					if ( data.old!=data.text ){
+						$.ajax({ 
+							url: "/api/rename",
+							type:"GET", 
+							data:{"oldname":data.old,"newname":data.text},
+							dataType: "jsonp", 
+							cache: false,
+							success: function(dat){
+								data.instance.refresh();
+							}
+						});	
+					}
+
+					// $.get('?operation=rename_node', { 'id' : data.node.id, 'text' : data.text })
+					// 	.done(function (d) {
+					// 		data.instance.set_id(data.node, d.id);
+					// 	})
+					// 	.fail(function () {
+					// 		data.instance.refresh();
+					// 	});
+
+				})
+				
+				.on('changed.jstree', function (e, data) {
+					if(data && data.selected && data.selected.length==1) {
+
+						var get_change = function( file ){
+							$.ajax({
+								url: "/api/read",
+								type:"GET",
+								data:{ "name":file }, //data.selected[0]
+								dataType: "jsonp",
+								cache: false,
+								success: function(dat){
+									editor.setValue(Base64.decode(dat.file),-1);
+									editor.focus();
+									bsave_change = false;
+									cur_file = data.selected[0];
+								}
+							});
+						};
+						if ( bsave_change && cur_file!="" && cur_file!=data.selected[0] ){
+							//执行保存
+							save( cur_file,function(){
+								get_change( data.selected[0] );
+							} );
+						}else{
+							get_change( data.selected[0] );
+						}
+					}
+//						$.get('?operation=get_content&id=' + data.selected.join(':'), function (d) {
+//							if(d && typeof d.type !== 'undefined') {
+//								$('#data .content').hide();
+//								switch(d.type) {
+//									case 'text':
+//									case 'js':
+//										$('#data .code').show();
+//										$('#code').val(d.content);
+//										break;
+//									default:
+//										$('#data .default').html(d.content).show();
+//										break;
+//								}
+//							}
+//						});
+//}
+//					else {
+//						$('#data .content').hide();
+//						$('#data .default').html('Select a file from the tree.').show();
+//					}
+				});
+		});
+		</script>
+	</body>
+</html>

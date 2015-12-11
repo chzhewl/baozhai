@@ -1,0 +1,91 @@
+    
+   #preview {
+      width: 100%;
+      height: 100%;
+      border: 0px;
+    }
+    #preview_c {
+      position: absolute;
+      right: 2px;
+      bottom: 30px;
+      left: 2px;
+      top: 50px;
+    }
+    #wait_tip{
+      position: absolute;
+      left: 25%;
+      top: 20%;
+      width: 50%;
+      height: 100px;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.6);
+      font-size: 15px;
+      margin: auto;
+      padding-top: 40px;
+      color: rgb(255, 255, 0);
+      border-radius: 2em;
+      z-index: 9999;
+    }
+
+    #qrcode{
+        position: absolute;
+        left: 40%;
+        top: 20%;
+        display: none;
+    }
+
+.login {
+    margin: auto;
+    margin-top: 100px;
+    width: 800px;
+    color: #fff;
+    background-color: #FFFFFF;
+    border-radius: 15px;
+    min-height: 300px;
+  }
+
+.login-icon {
+    margin: auto;
+    width: 300px;
+  }
+.login-icon > img {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  }
+
+.login-form {
+    padding-left: 60px;
+    padding-right: 60px;
+    background-color: #FFFFFF;
+  }
+.login-form .control-group {
+  position: relative;
+  margin-bottom: 6px;
+  }
+.login-form .login-field {
+    font-size: 17px;
+    text-indent: 3px;
+    border-color: #1ABC9C;
+  }
+.login-form .login-field:focus {
+  border-color: #1abc9c;
+  }
+.login-form .login-field:focus + .login-field-icon {
+  color: #1abc9c;
+  }
+.login-form .login-field-icon {
+  position: absolute;
+  top: 3px;
+  right: 15px;
+  font-size: 16px;
+  color: #bfc9ca;
+  -webkit-transition: all .25s;
+          transition: all .25s;
+  }
+footer {
+    margin-top: 5px;
+    text-align: center;
+    color: #ffffff;
+  }
+

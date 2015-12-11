@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>宝宅智能家居-网关登录</title>
+
+    <meta name="viewport" content="width=1000, initial-scale=1.0, maximum-scale=1.0">
+
+    <link href="css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="css/flat-ui.css" rel="stylesheet">
+    <link href="css/cascade.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+
+    <script src="js/jquery.min.js"></script>
+    <script src="js/jquery.qrcode.min.js"></script>
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements. All other JS at the end of file. -->
+    <!--[if lt IE 9]>
+      <script src="js/vendor/html5shiv.js"></script>
+      <script src="js/vendor/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+      <h2><a id="content" name="content">宝宅智能家居</a></h2>
+
+      <fieldset class="cbi-section">
+        <legend>系统运行状况</legend>
+        <table width="100%" cellspacing="10">
+          <tr><td width="33%">程序版本：</td>
+            <td><a href="#" title="系统版本" id="_nodejs_ver">……</a></td></td>
+          </tr>
+          <tr><td width="33%">内存占用：</td><td id="_mem_total">…… </td></tr>
+          <tr><td width="33%">已用内存/总内存：</td><td id="_mem_head_use_head_total">……</td></tr>
+          <tr><td width="33%">云端连接时长：</td><td id="_con_time_len">……</td></tr>
+          <tr><td width="33%">运行时长：</td><td id="_run_time_len">……</td></tr>
+          <tr><td width="33%" >已连接设备数：</td><td id="_conned_device_cnt">……</td></tr>
+          <tr><td width="33%">WIFI MAC地址：</td><td><a href="#" title="点击生成二维码" id="_wifi_mac">……（点击生成二维码）</a></td></tr>
+        </table>
+      </fieldset>
+
+      <fieldset class="cbi-section">
+        <legend>网关绑定</legend>
+        <table width="100%" cellspacing="10">
+          <tr>
+            <td><button id="req_bind_btn" type="button" disabled ="disabled" class="btn info">无绑定请求</button>
+            </td></tr>
+        </table>
+      </fieldset>
+
+      <fieldset class="cbi-section">
+        <legend>已接入设备列表</legend>
+        <div id="_devices_list"/>
+  </fieldset>
+</div>
+
+    <div id="qrcode"></div>
+
+
+    <script type="text/javascript">
+
+      var svrinfo;
+
+      $(document).click( function(){
+        $('#qrcode').fadeOut();
+      });
+
+      $("#_wifi_mac").click( function(event){
+        event.stopPropagation();
+        $('#qrcode').empty();
+        $('#qrcode').qrcode(svrinfo.mac);
+        $('#qrcode').fadeIn();
+      });
+      var host = window.location.hostname;
+
+      function get_data(action,callback)
+      {
+        $.ajax({
+          url: "/api/" + action,
+          type:"GET",
+          dataType: "json",
+          cache: false,
+          success: function(data){
+            callback( data );
+          }
+        });
+      }
+
+      function gettimelong( sec )
+      {
+        var str = "";
+        var day = parseInt( sec / (3600*24) );
+        if ( day>0 )  str += day + "天";
+        sec = sec - day*3600*24;
+
+        var hour = parseInt( sec / 3600 );
+        if ( hour>0 )  str += hour + "小时";
+
+        sec = sec - hour*3600;
+        var min = parseInt( sec / 60 );
+
+        str += min + "分钟";
+
+        return str;
+      }
+
+      function update_data()
+      {
+        //基本信息
+        get_data("status",function(data){
+          if ( !data.result || data.result!="success" ) return;
+          svrinfo = data.svrinfo;
+          var gw_time = data.gw_time;
+          $('#_nodejs_ver').html( svrinfo.system_ver );
+          $('#_mem_total').html(
+                  (svrinfo.mem_usage.rss/1024/1024).toFixed(2) + 'M');
+          $('#_mem_head_use_head_total').html(
+                  ( ( svrinfo.mem_total-svrinfo.mem_free) /1024/1024).toFixed(2) + 'M/' +
+                  (svrinfo.mem_total/1024/1024).toFixed(2) + 'M' );
+
+          $('#_con_time_len').html( gettimelong( gw_time - svrinfo.server_login_time ) );
+          $('#_run_time_len').html( gettimelong( gw_time - svrinfo.start_time ) );
+          $('#_conned_device_cnt').html( svrinfo.device_cnts );
+          $('#_wifi_mac').html( svrinfo.mac + " （点击生成二维码）" );
+        });
+
+        //		<tr class="cbi-section-table-row cbi-rowstyle-1"><td>kaiguan</td><td>独立wifi</td><td>82:A5:1B:7A:1E:0C</td><td>300天12小时22分钟</td><td>100</td></tr>
+
+        var table_head = '<table class="cbi-section-table" id="lease6_status_table" id=""> ' +
+                '<tr class="cbi-section-table-titles">' +
+                '<th class="cbi-section-table-cell">设备名</th>'+
+                '<th class="cbi-section-table-cell">MAC</th>'+
+                '<th class="cbi-section-table-cell">IP</th>'+
+                '<th class="cbi-section-table-cell">已连接时长</th>'+
+                '<th class="cbi-section-table-cell">版本</th>'+
+                '</tr>';
+        var table_tail = '</table>';
+
+        //设备
+        get_data("devices",function(data){
+          var devices = data.devices;
+          var gw_time = data.gw_time;
+          $("#_devices_list").empty();
+          var str = table_head;
+          for( var k in devices ){
+            var itm = devices[k];
+            str += '<tr class="cbi-section-table-row cbi-rowstyle-1"><td>'+k+'</td><td>'  + itm.mac + '</td><td>' + itm.ip + '</td><td>' + gettimelong(gw_time-itm.reg_time) + '</td><td>' + itm.ver + '</td></tr>';
+
+          }
+          str += table_tail;
+          $("#_devices_list").append(str);
+        });
+      }
+
+      function update_req_bind_btn()
+      {
+        get_data("get_req_bind_users",
+                function(data){
+                  console.log(data);
+                  var bind_cnt = 0;
+                  for( var k in data.req_bind_users ){
+                    bind_cnt++;
+                  }
+                  if ( bind_cnt>0 ){
+                    $("#req_bind_btn").attr("disabled",null);
+                    $("#req_bind_btn").html(bind_cnt+"个绑定请求");
+                  }else{
+                    $("#req_bind_btn").attr("disabled","disabled");
+                    $("#req_bind_btn").html("无绑定请求");
+                  }
+                }
+        );
+      }
+
+      setInterval( function(){
+        update_data();
+      },10000);
+
+      setInterval( function(){
+        update_req_bind_btn();
+      },1000);
+
+      update_data();
+
+      $("#req_bind_btn").on("click",function(){
+        get_data("ack_req_bind_users",
+                function(data){
+                });
+        $("#req_bind_btn").attr("disabled","disabled");
+        $("#req_bind_btn").html("正在处理");
+      });
+
+
+
+    </script>
+
+</body>
+</html>
