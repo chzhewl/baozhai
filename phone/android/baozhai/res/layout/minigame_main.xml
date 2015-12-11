@@ -1,0 +1,31 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent" >
+
+    <org.apache.cordova.CordovaWebView
+        android:id="@+id/cordovaWebView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="invisible" />
+
+    <ImageView
+
+           android:id="@+id/load_logo"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           android:layout_centerHorizontal="true"
+           android:layout_centerVertical="true"
+           android:src="@drawable/load_logo"/>
+
+    <TextView
+        android:id="@+id/loadprocess"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/load_logo"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:textSize="24dip"
+        android:gravity="center"
+        android:text="0%" />
+    
+</RelativeLayout>
