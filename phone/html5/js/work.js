@@ -591,7 +591,7 @@ $(document).on("mobileinit", function(){
                         var device = el.data("device");
                         var sensor = el.data("sensor");
                         var val  = el.val();
-                        if ( device && sensor && val!="undefined" ){
+                        if ( device && sensor && val!=undefined ){
                             sendmsg_tip();
                             This.socket.emit("set",{ gw_id:This._curgwid,device:device,sensor:sensor, value:val }  );
                         }
@@ -611,7 +611,7 @@ $(document).on("mobileinit", function(){
                         var device = el.data("device");
                         var sensor = el.data("sensor");
                         var val = el.data("tapval");
-                        if ( device && sensor && val!="undefined" ){
+                        if ( device && sensor && val!=undefined ){
                             sendmsg_tip();
                             This.socket.emit("set",
                                 { gw_id:This._curgwid,
@@ -642,7 +642,7 @@ $(document).on("mobileinit", function(){
                         var device = el.data("device");
                         var sensor = el.data("sensor");
                         var val = el.data("downval");
-                        if ( device && sensor && val!="undefined" ){
+                        if ( device && sensor && val!=undefined ){
                             sendmsg_tip();
                             This.socket.emit("set",
                                 { gw_id:This._curgwid,
@@ -664,7 +664,7 @@ $(document).on("mobileinit", function(){
                         var device = el.data("device");
                         var sensor = el.data("sensor");
                         var val = el.data("upval");
-                        if ( device && sensor && val!="undefined" ){
+                        if ( device && sensor && val!=undefined ){
                             sendmsg_tip();
                             This.socket.emit("set",{ gw_id:This._curgwid,device:device,sensor:sensor, value:val }  );
                         }
