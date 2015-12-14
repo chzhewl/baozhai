@@ -50,6 +50,16 @@ void on_set( const String& sensorname,
         buf[2] = (unsigned char)value.toInt();
         Serial.write( buf,sizeof(buf) );
     }
+    else if ( sensorname=="study")
+    {
+        unsigned char buf[4];
+        buf[0] = 0xff;
+        buf[1] = 0x01;
+        buf[3] = 0xfe;
+        
+        buf[2] = (unsigned char)value.toInt();
+        Serial.write( buf,sizeof(buf) );
+    }
 }
 
 
