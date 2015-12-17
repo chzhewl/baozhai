@@ -15,6 +15,9 @@
       s.parentNode.insertBefore(hm, s);
     })();
     </script>
+    <style type="text/css">  
+        .indent{text-indent: 2em;}
+    </style> 
 </head>
 <body>
 
@@ -56,13 +59,13 @@
 <div class="container block main" role="main">
 
 </p>
-宝宅技术交流QQ群（88853045）：
+宝宅技术交流QQ群(88853045)
 <a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=2baf9477250c33b68df0d7114a016db97fa109e9b135b9fc02f12422bf42d23c"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="宝宅技术交流" title="宝宅技术交流"></a>
 </p>
 
 <h2>宝宅智能家居 是什么？</h2>
 
-<p>宝宅智能家是一套简单易用而且开源的智能家居开发平台。宝宅智能家居为爱折腾的开发者们而生，目的是简化整套智能家居系统的开发复杂度，作为开发者可以将更多的精力放到到智能家居功能开发上来。</p>
+<p class="indent">宝宅智能家居是一套简单、易用、开源的智能家居开发平台，宝宅智能家居为爱折腾的开发者们而生，目的是为了简化智能家居系统的开发复杂度，使开发者们可以将更多的精力放到智能家居功能本身的开发上来。</p>
 
 <h2>我们先来看一个案例视频</h2>
 <p><embed src="http://player.youku.com/player.php/sid/XMTQxNTU0MDQ3Mg==/v.swf" allowFullScreen="true" quality="high" width="624" height="520" align="middle" allowScriptAccess="always" type="application/x-shockwave-flash"></embed></p>
@@ -76,15 +79,17 @@
 
 <p><img src="images/dev_process.png"/></p>
 
-<h2>硬件开发 </h2>
+<h2>设备开发 </h2>
 
-<p>使用市面上最便宜的ESP8266 WIFI芯片，基于Arduino for ESP8266 开发环境，像开发arduino一样简单来开发设备程序。</p>
+<p class="indent">采用ESP8266 WIFI芯片作为设备MCU，价格便宜，功能强大。基于Arduino for ESP8266 开发环境，完全可以像开发arduino程序一样方便的开发ESP8266程序。借助arduino便利开发的特性和已有arduino三方库可以很容易的实现与各类传感器对接。另外，基于宝宅提供的智能家居开发库，开发者无须关心具体的通讯细节，只需要通过简单的API调用就可以方便的与网关上的程序进行交互。</p>
+<p>Arduino for ESP8266 开发环境</p>
 <img src="images/arduino_ide.png"/>
 </p>
 
 <h2>网关开发 </h2>
 
-<p>跑在树莓派上或其他ARM CPU的设备上（闲置的手机也可以^_^），网关程序一键安装，WEB版在线集成开发环境，采用javascript语言开发，上手容易，通过在网关上编写控制代码非常方便的实现硬件访问和联动，<a target="blank" href="http://demogw.baozhai.cc/">点击查看网关管理系统的演示Demo(登录密码:admin)</a></p>
+<p class="indent">宝宅的网关开发需要先安装宝宅网关框架程序，框架程序采用Node.js开发，可以运行在树莓派或其他ARM CPU的设备上（手机也可以哦^_^），当然也可以运行在PC机上，目前支持在树莓派上一键安装。<p/>
+<p class="indent">宝宅网关框架为用户提供了WEB版在线集成开发环境，可以用来开发网关程序和设计手机端控制界面，采用Javascript和HTML/CSS WEB开发语言，上手容易。基于宝宅的网关开发框架，开发者无须关心设备与网关、网关与手机之间具体的通讯细节，只需要通过在WEB集成开发环境里编写少量的代码就可以非常方便的实现设备和手机的访问和联动，<a target="blank" href="http://demogw.baozhai.cc/">点击查看网关在线集成开发环境的演示Demo。</a></p>
 
 <p>登录界面</p>
 <img src="images/gateway-login.png"/>
@@ -95,9 +100,7 @@
 <p>网关集成开发环境</p>
 <img src="images/gateway-dev.png"/>
 </p>
-<h2>手机控制界面开发 </h2>
-
-<p>WEB版在线集成开发环境，实时效果预览，基于HTML+CSS开发，可以灵活设计自己想要的UI</p>
+<p>设计手机控制界面</p>
 <img src="images/gateway-phoneui.png"/>
 </p>
 <p>手机上的效果</p>
@@ -108,25 +111,25 @@
 <p>客厅温湿度、空气质量、人体红外和315Mhz发射/接收设备（挂壁盒）</p>
 <img src="images/device-01.png"/>
 </p>
-<p>卧室温湿度、空气质量、315Mhz发射设备（挂壁盒）</p>
+<p>卧室温湿度、空气质量和315Mhz发射设备（挂壁盒）</p>
 <img src="images/device-07.png"/>
 </p>
-<p>改造已有插座</p>
+<p>改造好的插座</p>
 <img src="images/device-02.png"/>
 </p>
-<p>改造饮水机</p>
+<p>改造好的饮水机</p>
 <img src="images/device-03.png"/>
 </p>
-<p>家庭能耗监控，读取当前电压、电流、功率等数据</p>
+<p>家庭能耗监控，可以获取电压、电流和功率等数据</p>
 <img src="images/device-04.png"/>
 </p>
-<p>红外学习，控制家里的红外设备，如电视、空调、风扇等</p>
+<p>红外学习设备，可以遥控家里的电视、功放机、空调和风扇等可以通过红外控制的家电</p>
 <img src="images/device-05.png"/>
 </p>
-<p>WIFI小车，改造的玩具车</p>
+<p>改造好的WIFI玩具车</p>
 <img src="images/device-06.png"/>
 </p>
-<h2>更多详细内容，请查看<a href="#">开发文档</a></h2>
+<h2>更多详细内容，请查看<a target="_blank" href="https://github.com/chzhewl/baozhai/blob/gh-pages/doc/01.md">开发文档</a></h2>
 
 
 </p>
