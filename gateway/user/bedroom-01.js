@@ -1,6 +1,7 @@
 /*
 *卧室
 */
+var util = require("./util.js");
 
 var devicename = "bedroom-01";
 
@@ -34,10 +35,22 @@ bzsdk.on_device( devicename,"val",function( sen,val ){
             val = val.split(",");
             dht_val.tempe = val[1] + "℃"
             dht_val.humi = val[0] + "%";
+            
+            //上报到乐联网
+            util.wl_update_data( "03",[ 
+                {"Name":"tempe2","Value":val[1]},
+                {"Name":"dht_humi2","Value":val[0]}
+            ] );
+            
             break;
         }
         case "pdsm501a":{
-            ppd42_val = val; 
+            ppd42_val = val;
+            
+            //上报到乐联网
+           // util.wl_update_data( "03",[ 
+            //    {"Name":"pm2","Value":val} ] );
+            
             break;
         }
     }

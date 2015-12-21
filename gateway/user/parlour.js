@@ -1,6 +1,7 @@
 /*
 *客厅
 */
+var util = require("./util.js");
 
 var devicename = "parlour";
 
@@ -34,10 +35,26 @@ bzsdk.on_device( devicename,"val",function( sen,val ){
             val = val.split(",");
             dht_val.tempe = val[1] + "℃"
             dht_val.humi = val[0] + "%";
+            
+            //上报到乐联网
+            util.wl_update_data( "03",[ 
+                {"Name":"tempe1","Value":val[1]},
+                {"Name":"dht_humi","Value":val[0]}
+            ] );
+            
+            //上报到乐联网
+            util.wl_update_data( "04",[ 
+                {"Name":"WD","Value":val[1]},
+                {"Name":"SD","Value":val[0]}
+            ] );
             break;
         }
         case "ppd42":{
-            ppd42_val = val; 
+            ppd42_val = val;
+            
+            //上报到乐联网
+            util.wl_update_data( "03",[ {"Name":"pm","Value":val} ] );
+            
             break;
         }
         case "315recv":{
