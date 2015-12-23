@@ -61,12 +61,15 @@ module.exports.getmac = function(interface){
     if(process.platform.indexOf('linux') == 0) {
         var interfaces = os.networkInterfaces();
         if ( !interfaces[interface] ){
+            for( var k in interfaces ){
+                return interfaces[k];
+            }
             return null;
         }else{
             return interfaces["wlan0"][0]["mac"].toUpperCase();
         }
     }else{
-        return "E8:4E:06:0E:22:5E";
+        return "00:00:00:00:00:00";
     }
 };
 
