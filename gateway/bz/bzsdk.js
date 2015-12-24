@@ -4,7 +4,7 @@
 var util = require("util");
 var events = require("events");
 var net = require('net');
-var bzuntil = require('./bzuntil.js');;
+var bzutil = require('./bzutil.js');;
 var JsonSocket = require('./json-socket.js');
 var dgram =  require('dgram');
 var mqtt = require('mqtt');
@@ -16,8 +16,6 @@ var mqtt = require('mqtt');
 	bzsdk.getdevice
 	bzsdk.setdevice
  */
-
-
 var bzsdk = function(mac){
 	events.EventEmitter.call(this);
 	var This = this;
@@ -384,16 +382,16 @@ bzsdk.prototype._ack_req_bind = function(user_id){
 }
 
 //当前时间戳
-bzsdk.prototype.curtimestamp = bzuntil.curtimestamp;
+bzsdk.prototype.curtimestamp = bzutil.curtimestamp;
 /*
 打印日志
  */
-bzsdk.prototype.log = bzuntil.log;
+bzsdk.prototype.log = bzutil.log;
 //系统日志
-bzsdk.prototype.syslog = bzuntil.syslog;
+bzsdk.prototype.syslog = bzutil.syslog;
 module.exports = new bzsdk();
 
-var mac = bzuntil.getmac("wlan0");
+var mac = bzutil.getmac("wlan0");
 if ( mac ){
 	module.exports.init( mac );
 }else{
