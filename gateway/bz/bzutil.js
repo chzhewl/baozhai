@@ -62,7 +62,7 @@ module.exports.getmac = function(interface){
         var interfaces = os.networkInterfaces();
         if ( !interfaces[interface] ){
             for( var k in interfaces ){
-                return interfaces[k];
+                return interfaces[k][0]["mac"];
             }
             return null;
         }else{
