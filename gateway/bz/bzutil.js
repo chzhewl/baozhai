@@ -58,19 +58,18 @@ exports.padding_num = function(str) {
 
 
 module.exports.getmac = function(interface){
-    if(process.platform.indexOf('linux') == 0) {
-        var interfaces = os.networkInterfaces();
-        if ( !interfaces[interface] ){
-            for( var k in interfaces ){
-                return interfaces[k];
-            }
-            return null;
-        }else{
-            return interfaces["wlan0"][0]["mac"].toUpperCase();
+    var interfaces = os.networkInterfaces();
+    if ( !interfaces[interface] ){
+        for( var k in interfaces ){
+            var v = interfaces[k];
+            if ( v[0]["internal"] ) continue;
+            return v[0]["mac"].toUpperCase();
         }
+        return null;
     }else{
-        return "00:00:00:00:00:00";
+        return interfaces[interface][0]["mac"].toUpperCase();
     }
+    return "00:00:00:00:00:00";
 };
 
 module.exports.getip = function(interface){
